@@ -1,0 +1,2081 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Spaceman Crash Game - Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* CSS untuk seluruh aplikasi */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: white;
+            min-height: 100vh;
+            padding: 15px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            background: rgba(0, 20, 40, 0.85);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+            border: 1px solid rgba(79, 195, 247, 0.3);
+            position: relative;
+        }
+        
+        /* Halaman disembunyikan secara default */
+        .page {
+            display: none;
+        }
+        
+        /* Halaman aktif ditampilkan */
+        .page.active {
+            display: block;
+        }
+        
+        /* Style untuk halaman Login/Register */
+        .auth-header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(79, 195, 247, 0.3);
+        }
+        
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            background: rgba(0, 30, 60, 0.6);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .auth-tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .auth-tab.active {
+            background: rgba(79, 195, 247, 0.3);
+            font-weight: bold;
+        }
+        
+        .auth-form {
+            display: none;
+        }
+        
+        .auth-form.active {
+            display: block;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .input-group label {
+            font-size: 0.85rem;
+            color: #b9f6ca;
+        }
+        
+        input, button, select {
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            font-size: 1rem;
+            width: 100%;
+        }
+        
+        input, select {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid #4fc3f7;
+        }
+        
+        button {
+            background: linear-gradient(to right, #4fc3f7, #0288d1);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        
+        button:hover {
+            background: linear-gradient(to right, #0288d1, #01579b);
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        button:disabled {
+            background: #555;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .captcha-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .captcha-code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            font-size: 1.2rem;
+            flex: 1;
+            text-align: center;
+            color: #ff9800;
+        }
+        
+        .refresh-captcha {
+            background: rgba(79, 195, 247, 0.3);
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
+            cursor: pointer;
+            color: white;
+        }
+        
+        .form-footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+        
+        .form-footer a {
+            color: #4fc3f7;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        /* Notifikasi error */
+        .error-notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(244, 67, 54, 0.9);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            z-index: 1000;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            display: none;
+            max-width: 90%;
+            text-align: center;
+        }
+        
+        /* Notifikasi sukses */
+        .success-notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(76, 175, 80, 0.9);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            z-index: 1000;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            display: none;
+            max-width: 90%;
+            text-align: center;
+        }
+        
+        /* Navigasi Footer */
+        .footer-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 20, 40, 0.95);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #4fc3f7;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        
+        .nav-item.active {
+            color: #69f0ae;
+        }
+        
+        .nav-icon {
+            font-size: 1.2rem;
+            margin-bottom: 4px;
+        }
+        
+        /* Style untuk halaman Home */
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(79, 195, 247, 0.3);
+        }
+        
+        .wallet-card {
+            background: rgba(0, 30, 60, 0.6);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .wallet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        /* Style untuk form deposit/withdraw */
+        .payment-method {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        
+        .payment-method.selected {
+            border: 2px solid #4fc3f7;
+        }
+        
+        .payment-icon {
+            font-size: 1.5rem;
+        }
+        
+        .transaction-history {
+            margin-top: 20px;
+        }
+        
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .transaction-type {
+            font-weight: bold;
+        }
+        
+        .transaction-deposit {
+            color: #69f0ae;
+        }
+        
+        .transaction-withdraw {
+            color: #ff5252;
+        }
+        
+        /* Style untuk game (tetap seperti sebelumnya) */
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(79, 195, 247, 0.3);
+        }
+        
+        h1 {
+            color: #4fc3f7;
+            text-shadow: 0 0 10px rgba(79, 195, 247, 0.8);
+            margin-bottom: 8px;
+            font-size: 1.8rem;
+        }
+        
+        .subtitle {
+            color: #b9f6ca;
+            font-size: 0.9rem;
+        }
+        
+        .control-panel {
+            background: rgba(0, 30, 60, 0.6);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .panel-title {
+            color: #4fc3f7;
+            margin-bottom: 10px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .game-display {
+            position: relative;
+            height: 250px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid #4fc3f7;
+            box-shadow: inset 0 0 15px rgba(79, 195, 247, 0.3);
+            margin-bottom: 15px;
+            transition: background-color 0.5s ease;
+        }
+        
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 5px),
+                radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 3px),
+                radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 4px);
+            background-size: 550px 550px, 350px 350px, 250px 250px;
+            background-position: 0 0, 40px 60px, 130px 270px;
+        }
+        
+        .rocket {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 50px;
+            transition: transform 0.5s ease-in-out;
+            z-index: 10;
+            color: #ff9800;
+            text-shadow: 0 0 10px rgba(255, 152, 0, 0.8);
+            animation: float 2s infinite alternate;
+        }
+        
+        @keyframes float {
+            from { transform: translateX(-50%) translateY(0px); }
+            to { transform: translateX(-50%) translateY(-15px); }
+        }
+        
+        .multiplier-display {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            font-weight: bold;
+            color: #4fc3f7;
+            text-shadow: 0 0 10px rgba(79, 195, 247, 0.9);
+            z-index: 5;
+        }
+        
+        .prediction-display {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 18px;
+            color: #ff9800;
+            text-shadow: 0 0 5px rgba(255, 152, 0, 0.8);
+            z-index: 5;
+            display: none;
+        }
+        
+        .win-notification {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 25px;
+            border-radius: 10px;
+            border: 2px solid #69f0ae;
+            color: #69f0ae;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            display: none;
+            z-index: 20;
+            box-shadow: 0 0 20px rgba(105, 240, 174, 0.5);
+        }
+        
+        .multiplier-markers {
+            position: absolute;
+            right: 8px;
+            top: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 10px 0;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.75rem;
+        }
+        
+        .stats-panel {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            background: rgba(0, 30, 60, 0.6);
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .stat-box {
+            text-align: center;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4fc3f7;
+            margin-top: 5px;
+        }
+        
+        .stat-label {
+            color: #b9f6ca;
+            font-size: 0.9rem;
+        }
+        
+        .history-panel {
+            background: rgba(0, 30, 60, 0.6);
+            padding: 12px;
+            border-radius: 12px;
+        }
+        
+        .history-title {
+            color: #4fc3f7;
+            margin-bottom: 10px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .history-items {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+        }
+        
+        .history-item {
+            min-width: 45px;
+            height: 45px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        /* Warna untuk history items berdasarkan multiplier */
+        .history-1-00 {
+            background: #9e9e9e; /* Abu-abu untuk 1.00x */
+            color: #333;
+        }
+        
+        .history-1-01-1-99 {
+            background: #81d4fa; /* Biru muda untuk 1.01x-1.99x */
+            color: #333;
+        }
+        
+        .history-2-00-9-99 {
+            background: #1976d2; /* Biru tua untuk 2.00x-9.99x */
+        }
+        
+        .history-10-00-99-99 {
+            background: #03a9f4; /* Biru tua terang untuk 10.00x-99.99x */
+        }
+        
+        .history-100-4999 {
+            background: #e91e63; /* Pink untuk 100x-4999x */
+        }
+        
+        .history-5000 {
+            background: #ffeb3b; /* Kuning untuk 5000x */
+            color: #333;
+        }
+        
+        /* Tombol prediksi di atas kiri */
+        .predict-button-container {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            z-index: 100;
+        }
+        
+        .predict-button {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            background: linear-gradient(to right, #ff9800, #f57c00);
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
+        }
+        
+        .predict-button:hover {
+            background: linear-gradient(to right, #f57c00, #e65100);
+            transform: translateY(-2px);
+        }
+        
+        .predict-button:disabled {
+            background: #555;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: rgba(0, 20, 40, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .close-modal {
+            float: right;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        /* Menambahkan style untuk mencegah zoom pada input di mobile */
+        @media screen and (max-width: 768px) {
+            input, select, textarea {
+                font-size: 16px !important;
+            }
+        }
+        
+        .cashout-amount {
+            font-size: 0.8rem;
+            margin-top: 5px;
+            font-weight: normal;
+        }
+        
+        .button-text {
+            font-size: 0.9rem;
+        }
+
+        /* Animasi untuk multiplier yang tinggi */
+        .high-multiplier {
+            animation: pulse 0.5s infinite alternate;
+            color: #ff5722 !important;
+        }
+        
+        @keyframes pulse {
+            from { transform: translateX(-50%) scale(1); }
+            to { transform: translateX(-50%) scale(1.2); }
+        }
+        
+        /* Tata letak baru untuk halaman home */
+        .balance-display {
+            font-size: 1.8rem;
+            text-align: center;
+            margin: 15px 0;
+            color: #4fc3f7;
+            text-shadow: 0 0 10px rgba(79, 195, 247, 0.5);
+        }
+        
+        .transaction-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+        }
+        
+        /* Tata letak untuk form input */
+        .form-container {
+            padding: 15px;
+            background: rgba(0, 30, 60, 0.6);
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+        
+        /* Perbaikan untuk tombol agar lebih responsif */
+        .btn {
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, #4fc3f7, #0288d1);
+            color: white;
+        }
+        
+        .btn-success {
+            background: linear-gradient(to right, #69f0ae, #00c853);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(to right, #ff5252, #d50000);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(to right, #ff9800, #f57c00);
+            color: white;
+        }
+        
+        /* Tata letak untuk halaman game yang lebih baik */
+        .game-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .bet-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .cashout-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        /* Perbaikan untuk tampilan mobile */
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            .game-controls {
+                grid-template-columns: 1fr;
+            }
+            
+            .wallet-header {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+        }
+        
+        .footer-info {
+            text-align: center;
+            padding: 10px;
+            color: #ccc;
+            font-size: 0.8rem;
+            border-top: 1px solid rgba(79, 195, 247, 0.3);
+            margin-bottom: 50px; /* biar nggak ketutup footer-nav */
+        }
+
+        /* Style untuk checkbox */
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+        }
+        
+        .checkbox-container input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+        }
+        
+        /* Style untuk modal terms and conditions */
+        .terms-content {
+            max-height: 60vh;
+            overflow-y: auto;
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        .terms-content h2 {
+            color: #4fc3f7;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .terms-content h3 {
+            color: #69f0ae;
+            margin: 15px 0 5px 0;
+            font-size: 1rem;
+        }
+        
+        .terms-content p {
+            margin-bottom: 10px;
+        }
+        
+        .terms-content ul {
+            padding-left: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .terms-content li {
+            margin-bottom: 5px;
+        }
+        
+        /* Tombol untuk modal terms */
+        #termsAccept {
+            background: linear-gradient(to right, #69f0ae, #00c853);
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+        }
+        
+        #termsAccept:disabled {
+            background: #555;
+            cursor: not-allowed;
+        }
+        
+        /* Efek crash merah transparan */
+        .crash-effect {
+            background-color: rgba(255, 0, 0, 0.3) !important;
+            border: 2px solid #ff0000 !important;
+            transition: background-color 0.5s ease, border 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-notification" id="errorNotification"></div>
+    <div class="success-notification" id="successNotification"></div>
+    
+    <!-- Modal untuk Syarat & Ketentuan -->
+    <div id="termsModal" class="modal" style="display: flex;">
+        <div class="modal-content">
+            <h2>Syarat & Ketentuan</h2>
+            <div class="terms-content">
+
+                <h3>1. Pendaftaran Akun</h3>
+                <p>Pemain wajib mengisi data pendaftaran dengan benar dan valid.</p>
+                <p>Minimal usia pemain adalah 18 tahun ke atas atau sesuai hukum di negara tempat tinggal.</p>
+                <p>Satu orang hanya boleh memiliki satu akun.</p>
+
+                <h3>2. Keamanan Akun</h3>
+                <p>Pemain bertanggung jawab menjaga kerahasiaan username dan password.</p>
+                <p>Penyedia game tidak bertanggung jawab atas kerugian akibat kelalaian menjaga akun.</p>
+
+                <h3>3. Deposit & Withdraw</h3>
+                <p>Minimal deposit dan withdraw adalah sesuai ketentuan yang berlaku (misalnya Rp10.000).</p>
+                <p>Semua transaksi menggunakan metode pembayaran resmi yang tersedia di platform.</p>
+                <p>Proses withdraw diproses maksimal dalam waktu 5-10 menit.</p>
+
+                <h3>4. Aturan Permainan</h3>
+                <p>Pemain wajib mengikuti aturan main setiap game.</p>
+                <p>Dilarang menggunakan bot, cheat, atau metode curang lainnya. Jika terdeteksi, akun akan dibekukan permanen.</p>
+
+                <h3>5. Bonus & Promosi</h3>
+                <p>Setiap bonus dan promosi memiliki syarat tambahan (misalnya turnover/wagering).</p>
+                <p>Penyedia berhak membatalkan bonus jika ditemukan penyalahgunaan.</p>
+
+                <h3>6. Tanggung Jawab</h3>
+                <p>Pemain menyadari bahwa permainan ini mengandung risiko kehilangan saldo.</p>
+                <p>Segala bentuk kerugian akibat keputusan bermain adalah tanggung jawab pemain.</p>
+
+                <h3>7. Privasi Data</h3>
+                <p>Data pribadi pemain hanya digunakan untuk kebutuhan verifikasi, transaksi, dan keamanan akun.</p>
+                <p>Data tidak akan dibagikan kepada pihak ketiga tanpa izin, kecuali diwajibkan oleh hukum.</p>
+
+                <h3>8. Perubahan Aturan</h3>
+                <p>Penyedia berhak mengubah Syarat & Ketentuan sewaktu-waktu.</p>
+                <p>Perubahan akan diumumkan melalui website/platform.</p>
+
+                <h3>9. Penutupan Akun</h3>
+                <p>Akun bisa ditutup oleh penyedia jika ada pelanggaran aturan.</p>
+                <p>Pemain juga berhak mengajukan penutupan akun secara permanen.</p>
+
+                <h3>Lisensi & Regulasi</h3>
+                <p>Platform ini dioperasikan oleh ISTANA 150 Gaming Ltd., terdaftar dan dilisensikan oleh Antillephone N.V. (8048/JAZ), yang diatur di bawah Pemerintah Curacao.</p>
+                <p>Lisensi ini memastikan bahwa:</p>
+                <ul>
+                    <li>Semua permainan menggunakan Random Number Generator (RNG) yang adil.</li>
+                    <li>Transaksi dan saldo pemain dikelola sesuai standar internasional.</li>
+                    <li>Hanya pemain yang berusia 18+ tahun yang boleh bermain.</li>
+                </ul>
+            </div>
+            
+            <div class="checkbox-container">
+                <input type="checkbox" id="agreeTerms">
+                <label for="agreeTerms">Saya telah membaca dan menyetujui Syarat & Ketentuan</label>
+            </div>
+            
+            <button id="termsAccept" disabled>Selesai</button>
+        </div>
+    </div>
+    
+    <!-- Modal untuk Deposit/Withdraw -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeModal">&times;</span>
+            <h2 id="modalTitle">Deposit</h2>
+            <div id="modalContent">
+                <!-- Konten modal akan diisi secara dinamis -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Halaman Login/Register -->
+    <div id="auth-page" class="page active">
+        <div class="container">
+            <div class="auth-header">
+                <h1><i class="fas fa-rocket"></i>     ISTANA 189</h1>
+                <p class="subtitle">Selamat datang di Spaceman Crash Game</p>
+            </div>
+            
+            <div class="auth-tabs">
+                <div class="auth-tab active" id="login-tab">Login</div>
+                <div class="auth-tab" id="register-tab">Daftar</div>
+            </div>
+            
+            <div id="login-form" class="auth-form active">
+                <div class="input-group">
+                    <label for="login-username">Username:</label>
+                    <input type="text" id="login-username" placeholder="Masukkan username">
+                </div>
+                
+                <div class="input-group">
+                    <label for="login-password">Password:</label>
+                    <input type="password" id="login-password" placeholder="Masukkan password">
+                </div>
+                
+                <button id="login-btn" class="btn btn-primary">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+                
+                <div class="form-footer">
+                    Belum punya akun? <a id="show-register">Daftar di sini</a>
+                </div>
+            </div>
+            
+            <div id="register-form" class="auth-form">
+                <div class="input-group">
+                    <label for="register-username">Username:</label>
+                    <input type="text" id="register-username" placeholder="Min. 8 karakter, huruf & angka">
+                    <small style="color: #ccc; font-size: 0.75rem;">Username terdiri dari huruf & angka, minimal 8 karakter, maksimal 16 karakter</small>
+                </div>
+                
+                <div class="input-group">
+                    <label for="register-password">Password:</label>
+                    <input type="password" id="register-password" placeholder="Min. 8 karakter">
+                    <small style="color: #ccc; font-size: 0.75rem;">Password minimal 8 karakter, maksimal 16 karakter</small>
+                </div>
+                
+                <div class="input-group">
+                    <label for="register-confirm-password">Konfirmasi Password:</label>
+                    <input type="password" id="register-confirm-password" placeholder="Ulangi password">
+                </div>
+                
+                <div class="input-group">
+                    <label for="register-captcha">Masukkan Kode Captcha:</label>
+                    <div class="captcha-container">
+                        <div class="captcha-code" id="captcha-code">1234</div>
+                        <button type="button" class="refresh-captcha" id="refresh-captcha">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <input type="text" id="register-captcha" placeholder="Masukkan kode di atas">
+                </div>
+                
+                <!-- Checkbox konfirmasi usia 18+ -->
+                <div class="checkbox-container">
+                    <input type="checkbox" id="age-confirm" required>
+                    <label for="age-confirm">Saya berusia 18 tahun ke atas</label>
+                </div>
+                
+                <button id="register-btn" class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i> Daftar
+                </button>
+                
+                <div class="form-footer">
+                    Sudah punya akun? <a id="show-login">Login di sini</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Halaman Home -->
+    <div id="home-page" class="page">
+        <div class="container">
+            <div class="welcome-section">
+                <h1><i class="fas fa-rocket"></i>     ISTANA 189</h1>
+                <p class="subtitle">Selamat datang, <span id="username-display">Pengguna</span>!</p>
+                <button id="logout-btn" class="btn btn-danger" style="margin-top: 10px;">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+            
+            <div class="wallet-card">
+                <div class="wallet-header">
+                    <div>
+                        <div class="stat-label">SALDO ANDA</div>
+                        <div class="balance-display" id="home-balance">Rp0</div>
+                    </div>
+                    <button id="refreshBalance" class="btn"><i class="fas fa-sync-alt"></i> Refresh</button>
+                </div>
+                
+                <div class="action-buttons">
+                    <button id="depositBtn" class="btn btn-success">
+                        <i class="fas fa-plus-circle"></i> Deposit
+                    </button>
+                    <button id="withdrawBtn" class="btn btn-danger">
+                        <i class="fas fa-minus-circle"></i> Withdraw
+                    </button>
+                </div>
+            </div>
+            
+            <div class="transaction-history">
+                <div class="history-title"><i class="fas fa-history"></i> RIWAYAT TRANSAKSI</div>
+                <div class="transaction-list" id="transaction-list">
+                    <!-- Daftar transaksi akan ditambahkan di sini -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Halaman Game -->
+    <div id="game-page" class="page">
+        <div class="container">
+            <!-- Tombol Prediksi di Atas Kiri -->
+            <div class="predict-button-container">
+                <button id="predictBtn" class="predict-button">
+                    <i class="fas fa-robot"></i>
+                </button>
+            </div>
+            
+            <header>
+                <h1><i class="fas fa-rocket"></i>     SPACEMAN CRASH</h1>
+                <p class="subtitle">Naikkan taruhan dan tekan Cash Out sebelum roket meledak!</p>
+            </header>
+            
+            <div class="control-panel">
+                <div class="panel-title"><i class="fas fa-coins"></i> TARUHAN</div>
+                <div class="input-group">
+                    <label for="betAmount">Jumlah Taruhan:</label>
+                    <input type="number" id="betAmount" min="1" value="2000">
+                    <small style="color: #ccc; font-size: 0.75rem;">Min: Rp2.000 | Max: Rp1.500.000</small>
+                </div>
+                <div class="input-group">
+                    <label for="autoCashout">Auto Cashout (x):</label>
+                    <input type="number" id="autoCashout" min="1" value="2" step="0.1">
+                </div>
+                <button id="placeBet" class="btn btn-primary"><i class="fas fa-play"></i> Pasang Taruhan</button>
+                
+                <div class="panel-title" style="margin-top: 15px;"><i class="fas fa-hand-holding-usd"></i> CAIRKAN</div>
+                <p style="margin-bottom: 10px; color: #ccc; font-size: 0.85rem;">Cairkan sebagian atau seluruh taruhan</p>
+                
+                <div class="game-controls">
+                    <button id="cashoutHalf" class="btn btn-warning" disabled>
+                        Cairkan 50%
+                        <div class="cashout-amount" id="cashoutHalfAmount">Rp0</div>
+                    </button>
+                    <button id="cashoutAll" class="btn btn-success" disabled>
+                        Cairkan 100%
+                        <div class="cashout-amount" id="cashoutAllAmount">Rp0</div>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="game-display">
+                <div class="stars"></div>
+                <div class="multiplier-display">1.00x</div>
+                <div class="prediction-display" id="predictionDisplay"></div>
+                <div class="rocket">🚀</div>
+                <div class="win-notification" id="winNotification"></div>
+                <div class="multiplier-markers">
+                    <div>1x</div>
+                    <div>2x</div>
+                    <div>5x</div>
+                    <div>10x</div>
+                    <div>50x</div>
+                </div>
+            </div>
+            
+            <div class="stats-panel">
+                <div class="stat-box">
+                    <div class="stat-label">SALDO</div>
+                    <div class="stat-value" id="balance">Rp1.000.000</div>
+                </div>
+            </div>
+            
+            <div class="history-panel">
+                <div class="history-title"><i class="fas fa-history"></i> HISTORY</div>
+                <div class="history-items" id="history">
+                    <!-- History items will be added here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Navigation -->
+    <div class="footer-nav">
+        <div class="nav-item active" data-page="home">
+            <div class="nav-icon"><i class="fas fa-home"></i></div>
+            <div>Home</div>
+        </div>
+        <div class="nav-item" data-page="game">
+            <div class="nav-icon"><i class="fas fa-gamepad"></i></div>
+            <div>Game</div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const authPage = document.getElementById('auth-page');
+            const homePage = document.getElementById('home-page');
+            const gamePage = document.getElementById('game-page');
+            const loginTab = document.getElementById('login-tab');
+            const registerTab = document.getElementById('register-tab');
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const showRegisterLink = document.getElementById('show-register');
+            const showLoginLink = document.getElementById('show-login');
+            const loginUsernameInput = document.getElementById('login-username');
+            const loginPasswordInput = document.getElementById('login-password');
+            const registerUsernameInput = document.getElementById('register-username');
+            const registerPasswordInput = document.getElementById('register-password');
+            const registerConfirmPasswordInput = document.getElementById('register-confirm-password');
+            const registerCaptchaInput = document.getElementById('register-captcha');
+            const captchaCodeElement = document.getElementById('captcha-code');
+            const refreshCaptchaButton = document.getElementById('refresh-captcha');
+            const loginButton = document.getElementById('login-btn');
+            const registerButton = document.getElementById('register-btn');
+            const logoutButton = document.getElementById('logout-btn');
+            const usernameDisplay = document.getElementById('username-display');
+            const ageConfirmCheckbox = document.getElementById('age-confirm');
+            
+            const betAmountInput = document.getElementById('betAmount');
+            const autoCashoutInput = document.getElementById('autoCashout');
+            const placeBetButton = document.getElementById('placeBet');
+            const cashoutHalfButton = document.getElementById('cashoutHalf');
+            const cashoutAllButton = document.getElementById('cashoutAll');
+            const predictButton = document.getElementById('predictBtn');
+            const multiplierDisplay = document.querySelector('.multiplier-display');
+            const predictionDisplay = document.getElementById('predictionDisplay');
+            const rocket = document.querySelector('.rocket');
+            const balanceSpan = document.getElementById('balance');
+            const homeBalanceSpan = document.getElementById('home-balance');
+            const historyContainer = document.getElementById('history');
+            const gameDisplay = document.querySelector('.game-display');
+            const winNotification = document.getElementById('winNotification');
+            const errorNotification = document.getElementById('errorNotification');
+            const successNotification = document.getElementById('successNotification');
+            const cashoutHalfAmount = document.getElementById('cashoutHalfAmount');
+            const cashoutAllAmount = document.getElementById('cashoutAllAmount');
+            const depositBtn = document.getElementById('depositBtn');
+            const withdrawBtn = document.getElementById('withdrawBtn');
+            const refreshBalanceBtn = document.getElementById('refreshBalance');
+            const transactionList = document.getElementById('transaction-list');
+            const paymentModal = document.getElementById('paymentModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalContent = document.getElementById('modalContent');
+            const closeModal = document.getElementById('closeModal');
+            const navItems = document.querySelectorAll('.nav-item');
+            const pages = document.querySelectorAll('.page');
+            
+            // Modal Syarat & Ketentuan
+            const termsModal = document.getElementById('termsModal');
+            const agreeTermsCheckbox = document.getElementById('agreeTerms');
+            const termsAcceptButton = document.getElementById('termsAccept');
+            
+            // Game state (tanpa localStorage)
+            let balance = 0;
+            let betAmount = 0;
+            let isPlaying = false;
+            let multiplier = 1;
+            let gameInterval;
+            let crashPoint = 0;
+            let autoCashout = 0;
+            let halfCashedOut = false;
+            let crashHistory = [];
+            let transactions = [];
+            let playerHasCashedOut = false;
+            let cashoutMultiplier = 0;
+            let hasPredicted = false;
+            let predictedCrashPoint = 0;
+            let gameSpeed = 100; // Kecepatan normal game (ms)
+            let isFastMode = false; // Mode cepat setelah cashout
+            let originalBetAmount = 0; // Untuk menyimpan nilai taruhan awal
+            let currentUser = null;
+            let users = {
+                "Taaoxy15": {
+                    password: "Admin123",
+                    balance: 0,
+                    transactions: [],
+                }
+            }; // Mengganti localStorage dengan objek biasa
+            
+            // Initialize
+            generateCaptcha();
+            checkLoggedInUser();
+            
+            // Generate captcha
+            function generateCaptcha() {
+                const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                let captcha = '';
+                for (let i = 0; i < 6; i++) {
+                    captcha += chars[Math.floor(Math.random() * chars.length)];
+                }
+                captchaCodeElement.textContent = captcha;
+                return captcha;
+            }
+            
+            // Check if user is logged in
+            function checkLoggedInUser() {
+                // Tanpa localStorage, selalu tampilkan halaman auth
+                showPage('auth');
+            }
+            
+            // Load user data
+            function loadUserData() {
+                if (currentUser && users[currentUser]) {
+                    balance = users[currentUser].balance || 0;
+                    transactions = users[currentUser].transactions || [];
+                    crashHistory = users[currentUser].crashHistory || [];
+                    updateBalanceDisplay();
+                    updateTransactionList();
+                    updateHistoryDisplay();
+                }
+            }
+            
+            // Save user data
+            function saveUserData() {
+                // Tidak perlu menyimpan ke localStorage
+                // Data tetap tersimpan dalam variabel users selama halaman tidak di-refresh
+            }
+            
+            // Show page
+            function showPage(pageName) {
+                pages.forEach(page => {
+                    page.classList.remove('active');
+                    if (page.id === `${pageName}-page`) {
+                        page.classList.add('active');
+                    }
+                });
+                
+                // Update navigation
+                navItems.forEach(nav => {
+                    nav.classList.remove('active');
+                    if (nav.getAttribute('data-page') === pageName) {
+                        nav.classList.add('active');
+                    }
+                });
+            }
+            
+            // Enable/disable terms accept button based on checkbox
+            agreeTermsCheckbox.addEventListener('change', function() {
+                termsAcceptButton.disabled = !this.checked;
+            });
+            
+            // Close terms modal when accept button is clicked
+            termsAcceptButton.addEventListener('click', function() {
+                termsModal.style.display = 'none';
+            });
+            
+            // Switch between login and register forms
+            loginTab.addEventListener('click', function() {
+                loginTab.classList.add('active');
+                registerTab.classList.remove('active');
+                loginForm.classList.add('active');
+                registerForm.classList.remove('active');
+            });
+            
+            registerTab.addEventListener('click', function() {
+                registerTab.classList.add('active');
+                loginTab.classList.remove('active');
+                registerForm.classList.add('active');
+                loginForm.classList.remove('active');
+            });
+            
+            showRegisterLink.addEventListener('click', function() {
+                registerTab.click();
+            });
+            
+            showLoginLink.addEventListener('click', function() {
+                loginTab.click();
+            });
+            
+            // Refresh captcha
+            refreshCaptchaButton.addEventListener('click', function() {
+                generateCaptcha();
+            });
+            
+            // Register new user
+            registerButton.addEventListener('click', function() {
+                const username = registerUsernameInput.value.trim();
+                const password = registerPasswordInput.value;
+                const confirmPassword = registerConfirmPasswordInput.value;
+                const captcha = registerCaptchaInput.value.trim();
+                const expectedCaptcha = captchaCodeElement.textContent;
+                
+                // Validasi input
+                if (!username || !password || !confirmPassword || !captcha) {
+                    showError("Harap isi semua field!");
+                    return;
+                }
+                
+                // Validasi username (huruf + angka, 8-16 karakter)
+                if (!/^[a-zA-Z0-9]{8,16}$/.test(username)) {
+                    showError("Username harus 8-16 karakter, hanya huruf dan angka!");
+                    return;
+                }
+                
+                if (username.length < 8 || username.length > 16) {
+                    showError("Username harus 8-16 karakter!");
+                    return;
+                }
+                
+                // Validasi password (8-16 karakter)
+                if (password.length < 8 || password.length > 16) {
+                    showError("Password harus 8-16 karakter!");
+                    return;
+                }
+                
+                if (password !== confirmPassword) {
+                    showError("Konfirmasi password tidak cocok!");
+                    return;
+                }
+                
+                if (captcha !== expectedCaptcha) {
+                    showError("Kode captcha tidak valid!");
+                    generateCaptcha();
+                    return;
+                }
+                
+                // Validasi konfirmasi usia
+                if (!ageConfirmCheckbox.checked) {
+                    showError("Anda harus mengkonfirmasi bahwa berusia 18 tahun ke atas!");
+                    return;
+                }
+                
+                // Check if username already exists
+                if (users[username]) {
+                    showError("Username sudah digunakan!");
+                    return;
+                }
+                
+                // Create new user
+                users[username] = {
+                    password: password,
+                    balance: 0,
+                    transactions: [],
+                    crashHistory: []
+                };
+                
+                showSuccess("Pendaftaran berhasil! Silakan login.");
+                loginTab.click();
+                
+                // Clear form
+                registerUsernameInput.value = '';
+                registerPasswordInput.value = '';
+                registerConfirmPasswordInput.value = '';
+                registerCaptchaInput.value = '';
+                ageConfirmCheckbox.checked = false;
+                generateCaptcha();
+            });
+            
+            // Login user
+            loginButton.addEventListener('click', function() {
+                const username = loginUsernameInput.value.trim();
+                const password = loginPasswordInput.value;
+                
+                // Validasi input
+                if (!username || !password) {
+                    showError("Harap isi username dan password!");
+                    return;
+                }
+                
+                // Check if user exists
+                if (!users[username]) {
+                    showError("Username tidak ditemukan!");
+                    return;
+                }
+                
+                // Check password
+                if (users[username].password !== password) {
+                    showError("Password salah!");
+                    return;
+                }
+                
+                // Login successful
+                currentUser = username;
+                usernameDisplay.textContent = currentUser;
+                loadUserData();
+                showPage('home');
+                showSuccess("Login berhasil!");
+                
+                // Clear form
+                loginUsernameInput.value = '';
+                loginPasswordInput.value = '';
+            });
+            
+            // Logout
+            logoutButton.addEventListener('click', function() {
+                currentUser = null;
+                showPage('auth');
+                showSuccess("Logout berhasil!");
+            });
+            
+            // Show error notification
+            function showError(message) {
+                errorNotification.textContent = message;
+                errorNotification.style.display = 'block';
+                
+                setTimeout(() => {
+                    errorNotification.style.display = 'none';
+                }, 3000);
+            }
+            
+            // Show success notification
+            function showSuccess(message) {
+                successNotification.textContent = message;
+                successNotification.style.display = 'block';
+                
+                setTimeout(() => {
+                    successNotification.style.display = 'none';
+                }, 3000);
+            }
+            
+            // Generate a random crash point with specific distribution
+            function generateCrashPoint() {
+                // Create distribution based on the requested percentages
+                const rand = Math.random();
+                
+                // 60% chance of low multiplier (1x - 2x)
+                if (rand < 0.6) {
+                    return 1 + Math.random();
+                }
+                // 25% chance of medium multiplier (2x - 10x)
+                else if (rand < 0.85) {
+                    return 2 + Math.random() * 8;
+                }
+                // 12% chance of high multiplier (10x - 50x)
+                else if (rand < 0.97) {
+                    return 10 + Math.random() * 40;
+                }
+                // 3% chance of very high multiplier (50x - 5000x)
+                else {
+                    return 50 + Math.random() * 4950;
+                }
+            }
+            
+            // Get history item class based on multiplier value
+            function getHistoryItemClass(multiplierValue) {
+                if (multiplierValue === 1.00) {
+                    return 'history-1-00';
+                } else if (multiplierValue >= 1.01 && multiplierValue <= 1.99) {
+                    return 'history-1-01-1-99';
+                } else if (multiplierValue >= 2.00 && multiplierValue <= 9.99) {
+                    return 'history-2-00-9-99';
+                } else if (multiplierValue >= 10.00 && multiplierValue <= 99.99) {
+                    return 'history-10-00-99-99';
+                } else if (multiplierValue >= 100 && multiplierValue <= 4999) {
+                    return 'history-100-4999';
+                } else if (multiplierValue >= 5000) {
+                    return 'history-5000';
+                }
+                return '';
+            }
+            
+            // Predict crash point (100% accurate prediction)
+            function predictCrashPoint() {
+                // Generate the actual crash point that will be used in the next game
+                predictedCrashPoint = generateCrashPoint();
+                return predictedCrashPoint;
+            }
+            
+            // Show prediction
+            function showPrediction() {
+                if (isPlaying) {
+                    showError("Prediksi hanya bisa dilakukan sebelum permainan dimulai!");
+                    return;
+                }
+                
+                if (hasPredicted) {
+                    showError("Anda sudah melakukan prediksi untuk taruhan ini!");
+                    return;
+                }
+                
+                const prediction = predictCrashPoint();
+                predictionDisplay.textContent = `Prediksi: ${prediction.toFixed(2)}x`;
+                predictionDisplay.style.display = 'block';
+                hasPredicted = true;
+                
+                // Hide after 5 seconds
+                setTimeout(() => {
+                    predictionDisplay.style.display = 'none';
+                }, 5000);
+            }
+            
+            // Update cashout button amounts
+            function updateCashoutAmounts() {
+                if (!isPlaying) {
+                    const currentBet = parseInt(betAmountInput.value);
+                    if (isNaN(currentBet) || currentBet < 2000) return;
+                    
+                    const halfAmount = Math.floor(currentBet * 1 * 0.5);
+                    const fullAmount = Math.floor(currentBet * 1);
+                    
+                    cashoutHalfAmount.textContent = `Rp${halfAmount.toLocaleString()}`;
+                    cashoutAllAmount.textContent = `Rp${fullAmount.toLocaleString()}`;
+                    return;
+                }
+                
+                if (halfCashedOut) {
+                    // Jika sudah cashout 50%, hanya update cashout semua untuk sisa taruhan
+                    const fullAmount = Math.floor(betAmount * multiplier);
+                    cashoutAllAmount.textContent = `Rp${fullAmount.toLocaleString()}`;
+                } else {
+                    // Update kedua tombol
+                    const halfAmount = Math.floor(betAmount * multiplier * 0.5);
+                    const fullAmount = Math.floor(betAmount * multiplier);
+                    cashoutHalfAmount.textContent = `Rp${halfAmount.toLocaleString()}`;
+                    cashoutAllAmount.textContent = `Rp${fullAmount.toLocaleString()}`;
+                }
+            }
+            
+            // Start the game
+            function startGame() {
+                if (isPlaying) return;
+                
+                betAmount = parseInt(betAmountInput.value);
+                autoCashout = parseFloat(autoCashoutInput.value);
+                
+                // Validasi taruhan
+                if (isNaN(betAmount) || betAmount < 2000) {
+                    showError("Taruhan minimal Rp2.000!");
+                    return;
+                }
+                
+                if (betAmount > 1500000) {
+                    showError("Taruhan maksimal Rp1.500.000!");
+                    return;
+                }
+                
+                if (betAmount > balance) {
+                    showError("Saldo tidak cukup!");
+                    return;
+                }
+                
+                // Reset state
+                halfCashedOut = false;
+                playerHasCashedOut = false;
+                cashoutMultiplier = 0;
+                isFastMode = false;
+                gameSpeed = 100;
+                originalBetAmount = betAmount; // Simpan nilai taruhan awal
+                
+                // Deduct bet amount from balance
+                balance -= betAmount;
+                updateBalanceDisplay();
+                saveUserData();
+                
+                isPlaying = true;
+                multiplier = 1;
+                
+                // Gunakan prediksi jika sudah dilakukan, jika tidak generate random
+                if (hasPredicted) {
+                    crashPoint = predictedCrashPoint;
+                } else {
+                    crashPoint = generateCrashPoint();
+                }
+                
+                // Update UI
+                placeBetButton.disabled = true;
+                placeBetButton.textContent = "Terbang...";
+                cashoutHalfButton.disabled = false;
+                cashoutAllButton.disabled = false;
+                predictButton.disabled = true;
+                multiplierDisplay.textContent = "1.00x";
+                predictionDisplay.style.display = 'none';
+                
+                // Update cashout amounts
+                updateCashoutAmounts();
+                
+                // Start game interval
+                gameInterval = setInterval(updateGame, gameSpeed);
+            }
+            
+            // Update game state
+            function updateGame() {
+                // Increase multiplier with acceleration
+                const increment = isFastMode ? (0.5 + (multiplier / 100)) : (0.05 + (multiplier / 1000));
+                multiplier += increment;
+                
+                // Update multiplier display
+                const multiplierText = multiplier.toFixed(2) + "x";
+                multiplierDisplay.textContent = multiplierText;
+                
+                // Add animation for high multipliers
+                if (multiplier > 10) {
+                    multiplierDisplay.classList.add('high-multiplier');
+                } else {
+                    multiplierDisplay.classList.remove('high-multiplier');
+                }
+                
+                // Update cashout amounts
+                updateCashoutAmounts();
+                
+                // Create a subtle floating effect for the rocket
+                const floatOffset = Math.sin(Date.now() / 200) * 5;
+                rocket.style.transform = `translateX(-50%) translateY(${floatOffset}px)`;
+                
+                // Check for auto cashout
+                if (autoCashout > 0 && multiplier >= autoCashout && !playerHasCashedOut) {
+                    cashOut(1.0); // Cash out 100%
+                    return;
+                }
+                
+                // Check for crash
+                if (multiplier >= crashPoint) {
+                    crash();
+                }
+            }
+            
+            // Cash out with percentage
+            function cashOut(percentage) {
+                if (!isPlaying || playerHasCashedOut) return;
+                
+                playerHasCashedOut = true;
+                cashoutMultiplier = multiplier;
+                
+                // For half cashout
+                if (percentage === 0.5) {
+                    const winAmount = Math.floor(originalBetAmount * multiplier * percentage);
+                    balance += winAmount;
+                    updateBalanceDisplay();
+                    saveUserData();
+                    
+                    // Update the bet amount to the remaining half
+                    betAmount = Math.floor(originalBetAmount * 0.5);
+                    halfCashedOut = true;
+                    
+                    cashoutHalfButton.disabled = true;
+                    // Set teks untuk cashout 50% dengan nilai yang sudah dicairkan
+                    cashoutHalfAmount.textContent = `Rp${winAmount.toLocaleString()}`;
+                    showWinNotification(winAmount);
+                    
+                    // Aktifkan kembali cashoutAll untuk sisa taruhan
+                    cashoutAllButton.disabled = false;
+                    updateCashoutAmounts();
+                    
+                    // Reset player cashout status untuk sisa taruhan
+                    playerHasCashedOut = false;
+                    
+                    return;
+                }
+                
+                // For full cashout
+                let winAmount;
+                if (halfCashedOut) {
+                    // Jika sudah cashout 50%, cairkan sisa taruhan
+                    winAmount = Math.floor(betAmount * multiplier);
+                } else {
+                    // Cashout semua dari awal
+                    winAmount = Math.floor(originalBetAmount * multiplier);
+                }
+                
+                balance += winAmount;
+                updateBalanceDisplay();
+                saveUserData();
+                
+                showWinNotification(winAmount);
+                
+                // Percepat permainan setelah cashout semua
+                isFastMode = true;
+                clearInterval(gameInterval);
+                gameInterval = setInterval(updateGame, 50); // Kecepatan lebih cepat
+            }
+            
+            // Crash - mengubah animasi ledakan menjadi efek warna merah
+            function crash() {
+                if (!isPlaying) return;
+                
+                clearInterval(gameInterval);
+                
+                // Tambahkan efek crash (warna merah transparan)
+                gameDisplay.classList.add('crash-effect');
+                
+                // Kembalikan warna setelah 800ms
+                setTimeout(() => {
+                    gameDisplay.classList.remove('crash-effect');
+                }, 800);
+                
+                // Add to history with the crash multiplier (hanya jika crash, bukan cashout)
+                addHistory(multiplier);
+                
+                resetGame();
+            }
+            
+            // Reset game state
+            function resetGame() {
+                isPlaying = false;
+                halfCashedOut = false;
+                playerHasCashedOut = false;
+                hasPredicted = false;
+                predictedCrashPoint = 0;
+                placeBetButton.disabled = false;
+                placeBetButton.textContent = "Pasang Taruhan";
+                cashoutHalfButton.disabled = true;
+                cashoutAllButton.disabled = true;
+                predictButton.disabled = false;
+                multiplierDisplay.classList.remove('high-multiplier');
+                
+                // Reset cashout amounts
+                updateCashoutAmounts();
+            }
+            
+            // Add history item (hanya untuk crash)
+            function addHistory(value) {
+                // Add to history array
+                crashHistory.unshift(value);
+                
+                // Keep only last 5 items
+                if (crashHistory.length > 5) {
+                    crashHistory.pop();
+                }
+                
+                // Update history display
+                updateHistoryDisplay();
+                saveUserData();
+            }
+            
+            // Update history display
+            function updateHistoryDisplay() {
+                historyContainer.innerHTML = '';
+                
+                crashHistory.forEach(item => {
+                    const historyItem = document.createElement('div');
+                    historyItem.classList.add('history-item');
+                    historyItem.classList.add(getHistoryItemClass(item));
+                    historyItem.textContent = item.toFixed(2) + 'x';
+                    historyContainer.appendChild(historyItem);
+                });
+            }
+            
+            // Show win notification (hanya nominal)
+            function showWinNotification(amount) {
+                winNotification.innerHTML = `Rp${amount.toLocaleString()}`;
+                winNotification.style.display = 'block';
+                
+                // Hide after 3 seconds
+                setTimeout(() => {
+                    winNotification.style.display = 'none';
+                }, 3000);
+            }
+            
+            // Update balance display
+            function updateBalanceDisplay() {
+                balanceSpan.textContent = `Rp${balance.toLocaleString()}`;
+                homeBalanceSpan.textContent = `Rp${balance.toLocaleString()}`;
+            }
+            
+            // Update transaction list
+            function updateTransactionList() {
+                transactionList.innerHTML = '';
+                
+                if (transactions.length === 0) {
+                    transactionList.innerHTML = '<div style="text-align: center; padding: 20px; color: #ccc;">Belum ada transaksi</div>';
+                    return;
+                }
+                
+                transactions.slice().reverse().forEach(transaction => {
+                    const transactionItem = document.createElement('div');
+                    transactionItem.classList.add('transaction-item');
+                    
+                    const transactionDate = new Date(transaction.date);
+                    const formattedDate = `${transactionDate.getDate()}/${transactionDate.getMonth() + 1}/${transactionDate.getFullYear()} ${transactionDate.getHours()}:${transactionDate.getMinutes().toString().padStart(2, '0')}`;
+                    
+                    transactionItem.innerHTML = `
+                        <div>
+                            <div class="transaction-type ${transaction.type === 'deposit' ? 'transaction-deposit' : 'transaction-withdraw'}">
+                                ${transaction.type === 'deposit' ? 'Deposit' : 'Withdraw'} - ${transaction.method}
+                            </div>
+                            <div style="font-size: 0.8rem; color: #ccc;">${formattedDate}</div>
+                        </div>
+                        <div style="font-weight: bold;">
+                            ${transaction.type === 'deposit' ? '+' : '-'}Rp${transaction.amount.toLocaleString()}
+                        </div>
+                    `;
+                    
+                    transactionList.appendChild(transactionItem);
+                });
+            }
+            
+            // Show deposit modal
+            function showDepositModal() {
+                modalTitle.textContent = 'Deposit';
+                
+                // Generate random wallet numbers
+                const danaNumber = '085725700988'
+                const ovoNumber = '085890115601'
+                const gopayNumber = '085724439081'
+                
+                modalContent.innerHTML = `
+                    <div class="input-group">
+                        <label for="depositAmountModal">Jumlah Deposit:</label>
+                        <input type="number" id="depositAmountModal" min="50000" value="10212">
+                        <small style="color: #ccc; font-size: 0.75rem;">Min: Rp50.000 (3 digit terakhir 212)</small>
+                    </div>
+                    
+                    <div class="panel-title" style="margin-top: 15px;"><i class="fas fa-wallet"></i> PILIH METODE PEMBAYARAN</div>
+                    
+                    <div class="payment-method selected" data-method="Dana">
+                        <div class="payment-icon"><i class="fas fa-money-bill-wave"></i></div>
+                        <div>
+                            <div style="font-weight: bold;">DANA</div>
+                            <div style="font-size: 0.8rem;">${danaNumber} (A/N Dina Afya)</div>
+                        </div>
+                    </div>
+                    
+                    <div class="payment-method" data-method="Ovo">
+                        <div class="payment-icon"><i class="fas fa-mobile-alt"></i></div>
+                        <div>
+                            <div style="font-weight: bold;">OVO</div>
+                            <div style="font-size: 0.8rem;">${ovoNumber} (A/N Riko Saputro)</div>
+                        </div>
+                    </div>
+                    
+                    <div class="payment-method" data-method="GoPay">
+                        <div class="payment-icon"><i class="fas fa-money-check"></i></div>
+                        <div>
+                            <div style="font-weight: bold;">GoPay</div>
+                            <div style="font-size: 0.8rem;">${gopayNumber} (A/N Riko Saputro)</div>
+                        </div>
+                    </div>
+                    
+                    <button id="confirmDeposit" class="btn btn-primary" style="margin-top: 20px;">
+                        <i class="fas fa-check-circle"></i> Konfirmasi Deposit
+                    </button>
+                `;
+                
+                // Add event listeners for payment method selection
+                const paymentMethods = modalContent.querySelectorAll('.payment-method');
+                paymentMethods.forEach(method => {
+                    method.addEventListener('click', function() {
+                        paymentMethods.forEach(m => m.classList.remove('selected'));
+                        this.classList.add('selected');
+                    });
+                });
+                
+                // Add event listener for confirm deposit button
+                const confirmDepositBtn = modalContent.querySelector('#confirmDeposit');
+                confirmDepositBtn.addEventListener('click', processDeposit);
+                
+                paymentModal.style.display = 'flex';
+            }
+            
+            // Process deposit
+            function processDeposit() {
+                const amount = parseInt(document.getElementById('depositAmountModal').value);
+                const selectedMethod = modalContent.querySelector('.payment-method.selected').getAttribute('data-method');
+                
+                if (isNaN(amount) || amount < 50000) {
+                    showError("Deposit minimal Rp50.000!");
+                    return;
+                }
+                
+                // Generate amount with 212 ending
+                const amountWith212 = Math.floor(amount / 1000) * 1000 + 212;
+                
+                // Add to balance
+                balance += amountWith212;
+                
+                // Add transaction to history
+                transactions.push({
+                    type: 'deposit',
+                    amount: amountWith212,
+                    method: selectedMethod,
+                    date: new Date().toISOString()
+                });
+                
+                // Update UI
+                updateBalanceDisplay();
+                updateTransactionList();
+                saveUserData();
+                
+                // Show success message
+                showSuccess(`Deposit berhasil! Rp${amountWith212.toLocaleString()} telah ditambahkan ke saldo Anda.`);
+                
+                // Close modal
+                paymentModal.style.display = 'none';
+            }
+            
+            // Show withdraw modal
+            function showWithdrawModal() {
+                modalTitle.textContent = 'Withdraw';
+                
+                modalContent.innerHTML = `
+                    <div class="input-group">
+                        <label for="withdrawAmountModal">Jumlah Withdraw:</label>
+                        <input type="number" id="withdrawAmountModal" min="10000" value="10000">
+                        <small style="color: #ccc; font-size: 0.75rem;">Min: Rp10.000</small>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="withdrawMethod">Metode Penarikan:</label>
+                        <select id="withdrawMethod">
+                            <option value="BCA">BCA</option>
+                            <option value="BNI">BNI</option>
+                            <option value="BRI">BRI</option>
+                            <option value="Mandiri">Mandiri</option>
+                            <option value="Dana">DANA</option>
+                            <option value="Ovo">OVO</option>
+                            <option value="GoPay">GoPay</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="accountNumber">Nomor Rekening/EWallet:</label>
+                        <input type="text" id="accountNumber" placeholder="Masukkan nomor rekening/ewallet">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="accountName">Atas Nama:</label>
+                        <input type="text" id="accountName" placeholder="Nama pemilik rekening/ewallet">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="withdrawPassword">Password:</label>
+                        <input type="password" id="withdrawPassword" placeholder="Masukkan password Anda">
+                    </div>
+                    
+                    <button id="confirmWithdraw" class="btn btn-primary" style="margin-top: 20px;">
+                        <i class="fas fa-check-circle"></i> Konfirmasi Withdraw
+                    </button>
+                `;
+                
+                // Add event listener for confirm withdraw button
+                const confirmWithdrawBtn = modalContent.querySelector('#confirmWithdraw');
+                confirmWithdrawBtn.addEventListener('click', processWithdraw);
+                
+                paymentModal.style.display = 'flex';
+            }
+            
+            // Process withdraw
+            function processWithdraw() {
+                const amount = parseInt(document.getElementById('withdrawAmountModal').value);
+                const method = document.getElementById('withdrawMethod').value;
+                const accountNumber = document.getElementById('accountNumber').value;
+                const accountName = document.getElementById('accountName').value;
+                const password = document.getElementById('withdrawPassword').value;
+                
+                if (isNaN(amount) || amount < 10000) {
+                    showError("Withdraw minimal Rp10.000!");
+                    return;
+                }
+                
+                if (amount > balance) {
+                    showError("Saldo tidak mencukupi!");
+                    return;
+                }
+                
+                if (!accountNumber || !accountName || !password) {
+                    showError("Harap lengkapi semua field!");
+                    return;
+                }
+                
+                // Check password
+                if (password !== users[currentUser].password) {
+                    showError("Password salah!");
+                    return;
+                }
+                
+                // Deduct from balance
+                balance -= amount;
+                
+                // Add transaction to history
+                transactions.push({
+                    type: 'withdraw',
+                    amount: amount,
+                    method: method,
+                    date: new Date().toISOString(),
+                    accountNumber: accountNumber,
+                    accountName: accountName
+                });
+                
+                // Update UI
+                updateBalanceDisplay();
+                updateTransactionList();
+                saveUserData();
+                
+                // Show success message
+                showSuccess(`Withdraw berhasil! Rp${amount.toLocaleString()} akan diproses dalam 5-10 menit.`);
+                
+                // Close modal
+                paymentModal.style.display = 'none';
+            }
+            
+            // Event listeners
+            placeBetButton.addEventListener('click', startGame);
+            cashoutHalfButton.addEventListener('click', () => cashOut(0.5));
+            cashoutAllButton.addEventListener('click', () => cashOut(1.0));
+            predictButton.addEventListener('click', showPrediction);
+            depositBtn.addEventListener('click', showDepositModal);
+            withdrawBtn.addEventListener('click', showWithdrawModal);
+            refreshBalanceBtn.addEventListener('click', () => {
+                updateBalanceDisplay();
+                showSuccess("Saldo diperbarui");
+            });
+            
+            closeModal.addEventListener('click', () => {
+                paymentModal.style.display = 'none';
+            });
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', (event) => {
+                if (event.target === paymentModal) {
+                    paymentModal.style.display = 'none';
+                }
+            });
+            
+            // Update cashout amounts when bet amount changes
+            betAmountInput.addEventListener('input', function() {
+                updateCashoutAmounts();
+            });
+            
+            // Cash out on spacebar press
+            document.addEventListener('keydown', function(e) {
+                if (e.code === 'Space' && isPlaying && !playerHasCashedOut) {
+                    cashOut(1.0);
+                    e.preventDefault(); // Prevent space from scrolling the page
+                }
+            });
+            
+            // Prevent zoom on input focus on mobile devices
+            document.addEventListener('touchstart', function() {
+                // This empty handler helps prevent zooming on iOS
+            }, { passive: false });
+            
+            // Initialize balance display
+            updateBalanceDisplay();
+            updateCashoutAmounts();
+            
+            // Add input validation for bet amount
+            betAmountInput.addEventListener('input', function() {
+                const value = parseInt(this.value);
+                
+                if (isNaN(value)) return;
+                
+                if (value < 2000) {
+                    showError("Taruhan minimal Rp2.000!");
+                } else if (value > 1500000) {
+                    showError("Taruhan maksimal Rp1.500.000!");
+                }
+                
+                updateCashoutAmounts();
+            });
+            
+            // Navigation
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    if (!currentUser) {
+                        showError("Silakan login terlebih dahulu!");
+                        showPage('auth');
+                        return;
+                    }
+                    
+                    const pageId = this.getAttribute('data-page');
+                    
+                    // Update active nav item
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show the corresponding page
+                    pages.forEach(page => {
+                        page.classList.remove('active');
+                        if (page.id === `${pageId}-page`) {
+                            page.classList.add('active');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+    <!-- Footer Info -->
+    <footer class="footer-info">
+        <p>© 2025 ISTANA 189 | All Rights Reserved</p>
+    </footer>
+</body>
+</html>
